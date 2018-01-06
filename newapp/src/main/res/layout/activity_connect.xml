@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/bt_connect"
+            android:layout_width="150dp"
+            android:layout_height="80dp"
+            android:text="connect"/>
+        <Button
+            android:id="@+id/bt_disconnect"
+            android:layout_width="150dp"
+            android:layout_height="80dp"
+            android:layout_marginLeft="30dp"
+            android:text="disconnect"/>
+     </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="#EEC211"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/bt_write"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_marginLeft="5dp"
+            android:text="write"/>
+        <Button
+            android:id="@+id/bt_read"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_marginLeft="5dp"
+            android:text="read"/>
+
+        <Button
+            android:id="@+id/bt_notify"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_marginLeft="5dp"
+            android:text="N_OPEN"/>
+
+        <Button
+            android:id="@+id/bt_battery"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_marginLeft="5dp"
+            android:text="battery"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="#EEC211"/>
+    <TextView
+         android:id="@+id/tv_conInfo"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+        android:hint="ble info"
+        android:textSize="20sp"/>
+</LinearLayout>
