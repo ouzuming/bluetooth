@@ -70,6 +70,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_connect);
         widget_init();
         showConnectInfo(mDevice);
+        Log.d("thread", "connectactivity onCreate current Thread's name:" +  Thread.currentThread().getName());
     }
 
     private void widget_init(){
@@ -90,6 +91,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
         mBt_battery.setOnClickListener(this);
     }
     private void showConnectInfo(BluetoothLeDevice cDevice){
+        Log.d("thread", "showConnectInfo current Thread's name:" +  Thread.currentThread().getName());
         sb_btInfo.append("name: ").append(cDevice.getName()).append("\n")
                 .append("MAC：").append(cDevice.getAddress()).append("\n")
                 .append("rssi: ").append(cDevice.getRssi()).append("\n");
@@ -135,6 +137,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                 }else {
                     String str_read =  HexUtil.encodeHexStr(data);
                     Log.d("ble_Status=","signature data[ "+"len:"+data.length+"  Data:"+ str_read+" ]");
+                    Log.d("thread", "readData signature onSuccess  current Thread's name:" +  Thread.currentThread().getName());
                 }
             }
             @Override
@@ -163,6 +166,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                     public void onSuccess(byte[] data, BluetoothGattChannel bluetoothGattChannel, BluetoothLeDevice bluetoothLeDevice) {
                         String str_notify =  HexUtil.encodeHexStr(data);
                         Log.d("ble_Status=","len:"+data.length+"  Data:"+ str_notify);
+                        Log.d("thread", "setNotifyListener onSuccess  current Thread's name:" +  Thread.currentThread().getName());
                     }
 
                     @Override
@@ -183,6 +187,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
     private void bt_writeData(DeviceMirror deviceMirror,byte[] data){
         if(deviceMirror != null) {
             Log.d("ble_Status=","write data");
+            Log.d("thread", "bt_writeData  current Thread's name:" +  Thread.currentThread().getName());
             deviceMirror.writeData(data);
             //BluetoothDeviceManager.getInstance().write(mDevice,data);
         }

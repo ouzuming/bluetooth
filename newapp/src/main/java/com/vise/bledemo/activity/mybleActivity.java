@@ -77,9 +77,9 @@ public class mybleActivity extends AppCompatActivity implements View.OnClickList
         ViseBle.getInstance().startScan(new ScanCallback(new IScanCallback() {
             @Override
             public void onDeviceFound(BluetoothLeDevice bluetoothLeDevice) {
-                Log.d("ble_scan","device found:"+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
+                Log.d("ble_Status","device found:"+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
                 if(!bluetoothLeDevice.getName().equalsIgnoreCase(ble_name)){
-                    Log.d("ble_scan","add device name: "+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
+                    Log.d("ble_Status","add device name: "+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
                     return;
                 }
                 bluetoothLeDeviceStore.addDevice(bluetoothLeDevice);
@@ -96,6 +96,12 @@ public class mybleActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onScanFinish(BluetoothLeDeviceStore bluetoothLeDeviceStore) {
                 Toast.makeText(mybleActivity.this,"onScanFinish",Toast.LENGTH_SHORT).show();
+
+                BluetoothLeDevice device = (BluetoothLeDevice) adapter.getItem(0);
+                if(device == null) return;
+                Intent intent = new Intent(mybleActivity.this, ConnectActivity.class);
+                intent.putExtra(ConnectActivity.CONNECT_DEVICE,device);
+                startActivity(intent);
             }
 
             @Override
