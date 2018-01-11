@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //Intent intent = new Intent(MainActivity.this, DeviceScanActivity.class);
-                Intent intent  = new Intent(MainActivity.this, mybleActivity.class);
+                Intent intent  = new Intent(MainActivity.this, functinSelectActivity.class);
                 startActivity(intent);
             }
         });

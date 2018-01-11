@@ -18,6 +18,7 @@ import com.vise.baseble.callback.scan.ScanCallback;
 import com.vise.baseble.model.BluetoothLeDevice;
 import com.vise.baseble.model.BluetoothLeDeviceStore;
 import com.vise.bledemo.R;
+import com.vise.bledemo.adapter.AutoConnectAdapter;
 import com.vise.bledemo.adapter.DeviceAdapter;
 
 public class mybleActivity extends AppCompatActivity implements View.OnClickListener {
@@ -96,12 +97,6 @@ public class mybleActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onScanFinish(BluetoothLeDeviceStore bluetoothLeDeviceStore) {
                 Toast.makeText(mybleActivity.this,"onScanFinish",Toast.LENGTH_SHORT).show();
-
-                BluetoothLeDevice device = (BluetoothLeDevice) adapter.getItem(0);
-                if(device == null) return;
-                Intent intent = new Intent(mybleActivity.this, ConnectActivity.class);
-                intent.putExtra(ConnectActivity.CONNECT_DEVICE,device);
-                startActivity(intent);
             }
 
             @Override
@@ -134,11 +129,9 @@ public class mybleActivity extends AppCompatActivity implements View.OnClickList
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.bt_scan:
-                Toast.makeText(mybleActivity.this,"start scan",Toast.LENGTH_SHORT).show();
                 start_scan();
                 break;
             case R.id.bt_stop:
-                Toast.makeText(mybleActivity.this,"stop scan",Toast.LENGTH_SHORT).show();
                 stop_scan();
                 break;
         }

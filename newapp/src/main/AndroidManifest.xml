@@ -18,9 +18,13 @@
         <activity android:name=".activity.DeviceScanActivity" />
         <activity android:name=".activity.DeviceDetailActivity" />
         <activity android:name=".activity.DeviceControlActivity" />
-        <activity android:name=".activity.mybleActivity" />
-        <activity android:name=".activity.ConnectActivity" />
-        <activity android:name=".activity.AutoConnectActivity"></activity>
+        <activity android:name=".activity.mybleActivity"
+                  android:label="Ble_Scan"/>
+        <activity android:name=".activity.ConnectActivity"
+                  android:label="Manual"/>
+        <activity android:name=".activity.AutoConnectActivity"
+                  android:label="Auto_Mode"/>
+        <activity android:name=".activity.functinSelectActivity" />
     </application>
 
 </manifest>

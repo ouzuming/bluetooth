@@ -67,4 +67,8 @@
         网站：http://www.huwei.tech\n
         博客：http://blog.csdn.net/xiaoyaoyou1212
     </string>
+    <string name="static_connected">connected</string>
+    <string name="static_disconnect">disconnect</string>
+    <string name="static_adversting">adversting</string>
+
 </resources>

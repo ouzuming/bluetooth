@@ -52,7 +52,6 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
     public static final String NOTIFY_CHARACTERISTIC_UUID_KEY = "notify_uuid_key";
     public static final String WRITE_DATA_KEY = "write_data_key";
 
-    private byte[] char_descriptors = {0x02,0x29};
     private  byte[] write_data = {0x01,0x02,0x03,0x04,0x05};
     public static final String CONNECT_DEVICE = "connect_device";
     private BluetoothLeDevice mDevice;
@@ -70,7 +69,6 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.activity_connect);
         widget_init();
         showConnectInfo(mDevice);
-        Log.d("thread", "connectactivity onCreate current Thread's name:" +  Thread.currentThread().getName());
     }
 
     private void widget_init(){
@@ -97,6 +95,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                 .append("rssi: ").append(cDevice.getRssi()).append("\n");
         mTv_conInfo.setText(sb_btInfo.toString());
     }
+
     private void bt_writeData_init(DeviceMirror deviceMirror){
         Log.d("ble_Status=","write data start init");
         BluetoothGattChannel bluetoothGattChannel = new BluetoothGattChannel.Builder()
@@ -127,7 +126,6 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                 .setPropertyType(PropertyType.PROPERTY_READ)
                 .setServiceUUID(UUID.fromString(serviceUUID))
                 .setCharacteristicUUID(UUID.fromString(readUUID))
-               // .setDescriptorUUID(UUID.fromString(descriptors_uuid))
                 .builder();
         deviceMirror.bindChannel(new IBleCallback() {
             @Override
@@ -136,8 +134,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                     Log.d("ble_Status=","battery data[ "+data[0]+"% ]");
                 }else {
                     String str_read =  HexUtil.encodeHexStr(data);
-                    Log.d("ble_Status=","signature data[ "+"len:"+data.length+"  Data:"+ str_read+" ]");
-                    Log.d("thread", "readData signature onSuccess  current Thread's name:" +  Thread.currentThread().getName());
+                    Log.d("ble_Status=","signature data[ " + "len:"+data.length + "  Data:"+ str_read+" ]");
                 }
             }
             @Override
@@ -155,7 +152,7 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                 .setPropertyType(PropertyType.PROPERTY_INDICATE)
                 .setServiceUUID(UUID.fromString(service_uuid))
                 .setCharacteristicUUID(UUID.fromString(notify_uuid))
-                .setDescriptorUUID(UUID.nameUUIDFromBytes(char_descriptors))
+                .setDescriptorUUID(UUID.fromString(descriptors_uuid))
                 .builder();
         deviceMirror.bindChannel(new IBleCallback() {
             @Override
@@ -279,7 +276,6 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                // displayGattServices(deviceMirror.getBluetoothGatt().getServices());
                 mDeviceMirror = deviceMirror;
                 bt_writeData_init(mDeviceMirror);
-               // bt_readData_init(mDeviceMirror);
                 bt_notifyData_init(mDeviceMirror);
             }
 

@@ -35,3 +35,4 @@ public class DeviceAdapter extends HelperAdapter<BluetoothLeDevice> {
         }
     }
 }
+
