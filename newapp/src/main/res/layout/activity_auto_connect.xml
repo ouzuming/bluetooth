@@ -12,7 +12,8 @@
             android:id="@+id/bt_scan2"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
-            android:text="START" />
+            android:text="START"
+            android:visibility="gone"/>
 
         <Button
             android:layout_gravity="right"
