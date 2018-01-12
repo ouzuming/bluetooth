@@ -53,7 +53,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     private boolean isBatteryRead = false;
 
-    private String ble_name = "i3vr";
+    private String ble_name = "dylan";
     Button mBt_function;
     ListView mLv_dev;
     TextView mTv_items, mTv_Name, mTv_Mac, mTv_Battery, mTv_Signature;
@@ -62,6 +62,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     private AutoConnectAdapter adapter;
     BluetoothLeDevice mDevice;
     Thread timeThread;
+    private int connectNum = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +113,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     private void start_scan() {
         Log.d("ble_Status=", "start scan " + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        bluetoothLeDeviceStore.clear();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -126,6 +128,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                 if(name != null){
                     if (bluetoothLeDevice.getName().equalsIgnoreCase(ble_name)) {
                         // Log.d("ble_Status", "add device name: " + bluetoothLeDevice.getName() + bluetoothLeDevice.getAddress());
+
                         bluetoothLeDeviceStore.addDevice(bluetoothLeDevice);
                         runOnUiThread(new Runnable() {
                             @Override
@@ -315,7 +318,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
             public void onConnectFailure(BleException exception) {
                 Log.d("ble_Status=", "connect fail" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
                 Message message = new Message();
-                 message.what= ENABLE_TIME_THREAD_TEXT;
+                 message.what= STOP_TEXT;
                  handler.sendMessage(message);
 
                 runOnUiThread(new Runnable() {
@@ -348,10 +351,15 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     private void connect_device_period() {
         int deviceNum = adapter.getCount();
-        int i = 0;
-        Log.d("ble_Status=", "adapter number" + deviceNum+" [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-        mDevice = (BluetoothLeDevice) adapter.getItem(i);
-        connectDevice(mDevice);
+        if(deviceNum != 0){
+            if(connectNum >= deviceNum){
+                connectNum = 0;
+            }
+            mDevice = (BluetoothLeDevice) adapter.getItem(connectNum);
+            connectDevice(mDevice);
+            connectNum++;
+            Log.d("ble_Status=", "connect item_" + connectNum +"at"+ deviceNum +" [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        }
     }
 
     private void updateConnectInfoUi(final boolean mode, final DeviceMirror mDeviceMirror, final String signatureData, final byte[] batteryData) {
@@ -406,7 +414,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
                 case STOP_TEXT:
                     Log.d("ble_Status=", "STOP_TEXT" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-                    //stop_scan();
+                    mDevice = null;
                     adapter.clear();
                     isBatteryRead = false;
                     start_scan();
