@@ -1,5 +1,6 @@
 package com.vise.bledemo.activity;
 
+import android.bluetooth.BluetoothDevice;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -53,7 +54,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     private boolean isBatteryRead = false;
 
     private String ble_name = "i3vr";
-    Button mBt_start, mBt_function;
+    Button mBt_function;
     ListView mLv_dev;
     TextView mTv_items, mTv_Name, mTv_Mac, mTv_Battery, mTv_Signature;
     DeviceMirror mDeviceMirror;
@@ -69,9 +70,8 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         widget_init();
         Ble_config_init();
         timeThread =  new Thread(new ThreadTime());
-        Message message  = new Message();
-        message.what = START_TEXT;
-        handler.sendMessage(message);
+        //timeThread.start();
+
     }
 
     @Override
@@ -88,9 +88,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         mTv_Battery = findViewById(R.id.tv_connectBattery);
         mTv_Signature = findViewById(R.id.tv_connectSignature);
 
-        mBt_start = findViewById(R.id.bt_scan2);
         mBt_function = findViewById(R.id.bt_test);
-        mBt_start.setOnClickListener(this);
         mBt_function.setOnClickListener(this);
         adapter = new AutoConnectAdapter(this);
         mLv_dev.setAdapter(adapter);
@@ -124,21 +122,23 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         ViseBle.getInstance().startScan(new ScanCallback(new IScanCallback() {
             @Override
             public void onDeviceFound(BluetoothLeDevice bluetoothLeDevice) {
-
-                if (!bluetoothLeDevice.getName().equalsIgnoreCase(ble_name)) {
-                    return;
-                }
-               // Log.d("ble_Status", "add device name: " + bluetoothLeDevice.getName() + bluetoothLeDevice.getAddress());
-                bluetoothLeDeviceStore.addDevice(bluetoothLeDevice);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if ((adapter != null) && (bluetoothLeDeviceStore != null)) {
-                            adapter.setListAll(bluetoothLeDeviceStore.getDeviceList());
-                            updateItemCount(adapter.getCount());
-                        }
+                String name = bluetoothLeDevice.getName();
+                if(name != null){
+                    if (bluetoothLeDevice.getName().equalsIgnoreCase(ble_name)) {
+                        // Log.d("ble_Status", "add device name: " + bluetoothLeDevice.getName() + bluetoothLeDevice.getAddress());
+                        bluetoothLeDeviceStore.addDevice(bluetoothLeDevice);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if ((adapter != null) && (bluetoothLeDeviceStore != null)) {
+                                    adapter.setListAll(bluetoothLeDeviceStore.getDeviceList());
+                                    updateItemCount(adapter.getCount());
+                                }
+                            }
+                        });
                     }
-                });
+                }
+
             }
 
             @Override
@@ -461,22 +461,9 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View view) {
         Message message = new Message();
         switch (view.getId()) {
-            case R.id.bt_scan2:
-                if(mBt_start.getText().equals("START")){
-                    message.what = START_TEXT;
-                    handler.sendMessage(message);
-                    mBt_start.setText("STOP");
-
-                }else{
-                    message.what = STOP_TEXT;
-                    handler.sendMessage(message);
-                    mBt_start.setText("START");
-                }
-                break;
-
             case R.id.bt_test:
-                message.what = ENABLE_TIME_THREAD_TEXT;
-                handler.sendMessage(message);
+                message.what = START_TEXT;
+                 handler.sendMessage(message);
                // message.what = UPDATE_TEXT;
                // handler.sendMessage(message);
 //                new Thread(new Runnable() {
