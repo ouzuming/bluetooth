@@ -1,8 +1,10 @@
 package com.vise.bledemo.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.widget.TextView;
 
+import com.vise.baseble.ViseBle;
 import com.vise.baseble.model.BluetoothLeDevice;
 import com.vise.xsnow.ui.adapter.helper.HelperAdapter;
 import com.vise.xsnow.ui.adapter.helper.HelperViewHolder;
@@ -33,7 +35,17 @@ public class AutoConnectAdapter extends HelperAdapter<BluetoothLeDevice>{
 
             tv_deviceMac.setText(device.getDevice().getAddress());
             tv_deviceRssi.setText("RSSI:"+device.getRssi()+"dB");
-            tv_deviceConnect.setText(R.string.static_adversting);
+            if(ViseBle.getInstance().isConnect(device)){
+                tv_deviceConnect.setText(R.string.static_connected);
+                tv_deviceConnect.setTextColor(Color.BLUE);
+                tv_deviceMac.setTextColor(Color.BLUE);
+                tv_deviceRssi.setTextColor(Color.BLUE);
+            }else {
+                tv_deviceConnect.setText(R.string.static_adversting);
+                tv_deviceConnect.setTextColor(Color.BLACK);
+                tv_deviceMac.setTextColor(Color.BLACK);
+                tv_deviceRssi.setTextColor(Color.BLACK);
+            }
         }
     }
 }
