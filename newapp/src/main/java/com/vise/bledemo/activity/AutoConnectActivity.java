@@ -376,7 +376,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                    Message message = new Message();
                    message.what = RUN_RESTART_MSG;
                    bleHandler.sendMessage(message);
-                   bt_clear();
+                  // bt_clear();
                }
             }
         });
@@ -384,8 +384,8 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     private void disconnectDevice(BluetoothLeDevice cDdvice) {
         Log.d("ble_Status=", "disconnect device" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-        ViseBle.getInstance().disconnect(cDdvice);
-        //ViseBle.getInstance().disconnect();
+        //ViseBle.getInstance().disconnect(cDdvice);
+        ViseBle.getInstance().disconnect();
 
     }
 
@@ -496,13 +496,12 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         public boolean handleMessage(Message message) {
             switch (message.what){
                 case START_SCAN_MSG:
-                    isTimeThreadBusy = false;
+
                     Log.d("ble_Status","START_SCAN_MSG + onDisconnect" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
                     if(mDevice != null){
                         if(ViseBle.getInstance().isConnect(mDevice)){
                             Log.d("ble_Status","START_SCAN_MSG_onDisconnect" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
                             disconnectDevice(mDevice);
-
                             return true;
                         }
                     }
@@ -523,7 +522,8 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                     bt_readSignatureData();
                     break;
 
-                case RUN_RESTART_MSG:
+                case
+                :
                     Log.d("ble_Status","RUN_RESTART_MSG" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
                    if(isTimeThreadBusy){
                        Log.d("ble_Status","isTimeThreadBusy" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
