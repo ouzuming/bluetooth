@@ -123,9 +123,9 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     private void Ble_config_init() {
         ViseBle.config()
                 .setScanTimeout(5000)//扫描超时时间，这里设置为永久扫描
-                .setConnectTimeout(10 * 1000)//连接超时时间
+                .setConnectTimeout(3000)//连接超时时间
                 .setOperateTimeout(5 * 1000)//设置数据操作超时时间
-                .setConnectRetryCount(3)//设置连接失败重试次数
+                .setConnectRetryCount(1)//设置连接失败重试次数
                 .setConnectRetryInterval(1000)//设置连接失败重试间隔时间
                 .setOperateRetryCount(3)//设置数据操作失败重试次数
                 .setOperateRetryInterval(1000)//设置数据操作失败重试间隔时间
@@ -418,31 +418,26 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
             public void run() {
                 if (mode) {
                     if (mDeviceMirror != null) {
-                        Log.d("ble_Status=", "set text name mac" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         mTv_Name.setText(String.format("Name: %s", mDeviceMirror.getBluetoothLeDevice().getName()));
                         mTv_Mac.setText(String.format("Mac: %s   RSSI: %ddB", mDeviceMirror.getBluetoothLeDevice().getAddress(), mDeviceMirror.getBluetoothLeDevice().getRssi()));
-                        Log.d("ble_Status=", "set text name mac2" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                        Log.d("ble_Status=", "set text Name and Mac" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     }
                     if (signatureData != null) {
-                        Log.d("ble_Status=", "set text signature!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         mTv_Signature.setText(String.format("Signature: %s", signatureData));
-                        Log.d("ble_Status=", "set text signature2!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                        Log.d("ble_Status=", "set text signature!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     }
                     if (batteryData != null) {
-                        Log.d("ble_Status=", "set text battery!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         mTv_Battery.setText(String.format("Battery: %s%%", batteryData[0]));
-                        Log.d("ble_Status=", "set text battery2!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                        Log.d("ble_Status=", "set text battery!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
 
                     }
                     if(notifyData != null){
-                        Log.d("ble_Status=", "set text notify!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                        mTv_Notify.setText(String.format("Signature: %s", notifyData));
+                        mTv_Notify.setText(String.format("Notify: %s", notifyData));
                         Log.d("ble_Status=", "set text notify2!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     }
                 } else {
-                    Log.d("ble_Status=", "clear info window" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     clearUpdateConnectInfo();
-                    Log.d("ble_Status=", "clear info window 2" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    Log.d("ble_Status=", "clear info window " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 }
             }
         });
