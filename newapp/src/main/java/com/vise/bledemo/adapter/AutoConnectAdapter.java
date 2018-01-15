@@ -28,7 +28,7 @@ public class AutoConnectAdapter extends HelperAdapter<BluetoothLeDevice>{
         if(device != null && device.getDevice() != null){
             String deviceName = device.getDevice().getName();
             if(deviceName != null && !deviceName.isEmpty()){
-                tv_deviceName.setText(deviceName);
+                tv_deviceName.setText(position+ ": " + deviceName);
             }else {
                 tv_deviceName.setText("unknow_device");
             }

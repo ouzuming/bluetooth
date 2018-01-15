@@ -1,10 +1,9 @@
 package com.vise.bledemo.activity;
 
-import android.bluetooth.BluetoothDevice;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,10 +25,6 @@ import com.vise.baseble.model.BluetoothLeDeviceStore;
 import com.vise.baseble.utils.HexUtil;
 import com.vise.bledemo.R;
 import com.vise.bledemo.adapter.AutoConnectAdapter;
-import com.vise.bledemo.myClass.MyLogClass;
-import com.vise.log.config.LogDefaultConfig;
-
-import org.apache.http.conn.scheme.HostNameResolver;
 
 import java.util.UUID;
 
@@ -64,7 +59,10 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     private boolean isTimeThreadBusy = false;
 
-    private String ble_name = "dylan";
+    // private String ble_name = "dylan";
+    private String ble_name = "i3vr controller";
+     //private String ble_name = "i3vr";
+
     Button mBt_function;
     ListView mLv_dev;
     TextView mTv_items, mTv_Name, mTv_Mac, mTv_Battery, mTv_Signature;
@@ -80,7 +78,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_auto_connect);
         widget_init();
         Ble_config_init();
-        if(bleHandler != null){
+        if (bleHandler != null) {
             Message message = new Message();
             message.what = START_SCAN_MSG;
             bleHandler.sendMessage(message);
@@ -89,9 +87,9 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     protected void onDestroy() {
-        Log.d("ble_Status=", "onDestroy" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-        if(mDevice != null){
-            if(ViseBle.getInstance().isConnect(mDevice)){
+        Log.d("ble_Status=", "onDestroy" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+        if (mDevice != null) {
+            if (ViseBle.getInstance().isConnect(mDevice)) {
                 disconnectDevice(mDevice);
             }
         }
@@ -104,13 +102,13 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     protected void onStop() {
-        Log.d("ble_Status=", "onStop" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "onStop" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         super.onStop();
     }
 
     @Override
     protected void onPause() {
-        Log.d("ble_Status=", "onPause" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "onPause" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         super.onPause();
     }
 
@@ -129,14 +127,26 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void Ble_config_init() {
+//        ViseBle.config()
+//                .setScanTimeout(5000)
+//                .setConnectTimeout(10000)
+//                .setOperateTimeout(1000)
+//                .setOperateRetryCount(1)
+//                .setConnectRetryInterval(500)
+//                .setOperateRetryInterval(500)
+//                .setMaxConnectCount(1);
+//        ViseBle.getInstance().init(this);
+//
         ViseBle.config()
-                .setScanTimeout(5000)
-                .setConnectTimeout(1000)
-                .setOperateRetryCount(1)
-                .setConnectRetryInterval(1000)
-                .setOperateRetryInterval(1000)
-                .setMaxConnectCount(1);
-        ViseBle.getInstance().init(this);
+                .setScanTimeout(5000)//扫描超时时间，这里设置为永久扫描
+                .setConnectTimeout(10 * 1000)//连接超时时间
+                .setOperateTimeout(5 * 1000)//设置数据操作超时时间
+                .setConnectRetryCount(3)//设置连接失败重试次数
+                .setConnectRetryInterval(1000)//设置连接失败重试间隔时间
+                .setOperateRetryCount(3)//设置数据操作失败重试次数
+                .setOperateRetryInterval(1000)//设置数据操作失败重试间隔时间
+                .setMaxConnectCount(3);//设置最大连接设备数量
+        ViseBle.getInstance().init(this);//蓝牙信息初始化，全局唯一，必须在应用初始化时调用
     }
 
     private void updateItemCount(int count) {
@@ -144,10 +154,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void start_scan() {
-        Log.d("ble_Status=", "start scan " + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-       // bt_clear();
-        //Ble_config_init();
-
+        Log.d("ble_Status=", "start scan " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -158,11 +165,11 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         ViseBle.getInstance().startScan(new ScanCallback(new IScanCallback() {
             @Override
             public void onDeviceFound(BluetoothLeDevice bluetoothLeDevice) {
+                //  Log.d("ble_Status", "scan device name: " + bluetoothLeDevice.getName()+"__" + bluetoothLeDevice.getAddress());
                 String name = bluetoothLeDevice.getName();
-                if(name != null){
+                if (name != null) {
                     if (bluetoothLeDevice.getName().equalsIgnoreCase(ble_name)) {
-                        // Log.d("ble_Status", "add device name: " + bluetoothLeDevice.getName() + bluetoothLeDevice.getAddress());
-
+                        //  Log.d("ble_Status", "add device name: " + bluetoothLeDevice.getName() + bluetoothLeDevice.getAddress());
                         bluetoothLeDeviceStore.addDevice(bluetoothLeDevice);
                         runOnUiThread(new Runnable() {
                             @Override
@@ -175,31 +182,33 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                         });
                     }
                 }
-
             }
 
             @Override
             public void onScanFinish(BluetoothLeDeviceStore bluetoothLeDeviceStore) {
-                Log.d("ble_Status=", "scan finish" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(AutoConnectActivity.this, " start connect", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                connect_device_period();
+                Log.d("ble_Status=", "scan finish" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                if (adapter.getCount() != 0) {
+                    connect_device_period();
+                } else {
+                    Log.d("ble_Status=", "no correct device to connect" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    if (bleHandler != null) {
+                        Message message = new Message();
+                        message.what = RUN_RESTART_MSG;
+                        bleHandler.sendMessage(message);
+                   }
+                }
             }
 
             @Override
             public void onScanTimeout() {
-                Log.d("ble_Status=", "scan timeOut" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                Log.d("ble_Status=", "scan timeOut" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(AutoConnectActivity.this, "Scan Timeout", Toast.LENGTH_SHORT).show();
                     }
                 });
-                if(bleHandler != null){
+                if (bleHandler != null) {
                     Message message = new Message();
                     message.what = RUN_RESTART_MSG;
                     bleHandler.sendMessage(message);
@@ -209,23 +218,26 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void stop_scan() {
-        Log.d("ble_Status=", "stop_scan" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "stop_scan" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         ViseBle.getInstance().stopScan(perScanCallback);
     }
+
     private ScanCallback perScanCallback = new ScanCallback(new IScanCallback() {
         @Override
         public void onDeviceFound(BluetoothLeDevice bluetoothLeDevice) {
         }
+
         @Override
         public void onScanFinish(BluetoothLeDeviceStore bluetoothLeDeviceStore) {
         }
+
         @Override
         public void onScanTimeout() {
         }
     });
 
     private void bt_readData_init(DeviceMirror deviceMirror, String serviceUUID, String readUUID) {
-        Log.d("ble_Status=", "read data init" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "read data init" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         BluetoothGattChannel bluetoothGattChannel = new BluetoothGattChannel.Builder()
                 .setBluetoothGatt(deviceMirror.getBluetoothGatt())
                 .setPropertyType(PropertyType.PROPERTY_READ)
@@ -239,32 +251,32 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                 Bundle bundle = new Bundle();
                 if (bluetoothGattChannel.getCharacteristicUUID().equals(UUID.fromString(battery_read_uuid))) {
                     message.what = READ_BATTERY_MSG;
-                    bundle.putByteArray(BATTERY_DATA,data);
+                    bundle.putByteArray(BATTERY_DATA, data);
                 } else {
                     message.what = READ_SIGNATURE_MSG;
-                    bundle.putByteArray(SIGNATURE_DATA,data);
+                    bundle.putByteArray(SIGNATURE_DATA, data);
                 }
                 message.setData(bundle);
-                if(dataHandler != null){
+                if (dataHandler != null) {
                     dataHandler.sendMessage(message);
                 }
             }
 
             @Override
             public void onFailure(BleException exception) {
-                Log.d("ble_Status=", "read failure" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-               if(bleHandler != null){
-                   Message message = new Message();
-                   message.what= RUN_RESTART_MSG;
-                   bleHandler.sendMessage(message);
-               }
+                Log.d("ble_Status=", "read failure" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                if (bleHandler != null) {
+                    Message message = new Message();
+                    message.what = RUN_RESTART_MSG;
+                    bleHandler.sendMessage(message);
+                }
             }
         }, bluetoothGattChannel);
         deviceMirror.readData();
     }
 
     private void bt_notifyData_init(final DeviceMirror deviceMirror) {
-        Log.d("ble_Status=", "notify init" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "notify init" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         BluetoothGattChannel bluetoothGattChannel = new BluetoothGattChannel.Builder()
                 .setBluetoothGatt(deviceMirror.getBluetoothGatt())
                 .setPropertyType(PropertyType.PROPERTY_INDICATE)
@@ -280,14 +292,13 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                     public void onSuccess(byte[] data, BluetoothGattChannel bluetoothGattChannel, BluetoothLeDevice bluetoothLeDevice) {
                         String str_notify = HexUtil.encodeHexStr(data);
                         Log.d("ble_Status=", "len:" + data.length + "  Data:" + str_notify);
-
                     }
 
                     @Override
                     public void onFailure(BleException exception) {
-                        if(bleHandler != null){
+                        if (bleHandler != null) {
                             Message message = new Message();
-                            message.what= RUN_RESTART_MSG;
+                            message.what = RUN_RESTART_MSG;
                             bleHandler.sendMessage(message);
                         }
                     }
@@ -296,10 +307,10 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
             @Override
             public void onFailure(BleException exception) {
-                Log.d("ble_Status=", "notify init fail" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-                if(bleHandler != null){
+                Log.d("ble_Status=", "notify init fail" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                if (bleHandler != null) {
                     Message message = new Message();
-                    message.what= RUN_RESTART_MSG;
+                    message.what = RUN_RESTART_MSG;
                     bleHandler.sendMessage(message);
                 }
             }
@@ -315,28 +326,28 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     private int bt_readBatteryEnergy() {
         int battery = 0;
-        Log.d("ble_Status=", "start read battery data" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "start read battery data" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         bt_readData(mDeviceMirror, battery_service_uuid, battery_read_uuid);
         return battery;
     }
 
     private int bt_readSignatureData() {
         int battery = 0;
-        Log.d("ble_Status=", "start read signature data" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "start read signature data" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         bt_readData(mDeviceMirror, service_uuid, read_uuid);
         return battery;
     }
 
     private void connectDevice(BluetoothLeDevice cDevice) {
-        Log.d("ble_Status=", "start connect devict" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "start connect devict" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         ViseBle.getInstance().connect(cDevice, new IConnectCallback() {
             @Override
             public void onConnectSuccess(DeviceMirror deviceMirror) {
-                Log.d("ble_Status=", "connect success" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                Log.d("ble_Status=", "connect success" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 // displayGattServices(deviceMirror.getBluetoothGatt().getServices());
                 mDeviceMirror = deviceMirror;
                 // bt_writeData_init(mDeviceMirror);
-               // bt_notifyData_init(mDeviceMirror);
+                // bt_notifyData_init(mDeviceMirror);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -346,7 +357,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                         }
                     }
                 });
-                if(bleHandler != null){
+                if (bleHandler != null) {
                     Message message = new Message();
                     message.what = CONNECT_SUCCESS_MSG;
                     bleHandler.sendMessage(message);
@@ -355,12 +366,12 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
             @Override
             public void onConnectFailure(BleException exception) {
-                Log.d("ble_Status=", "connect fail" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-               if(bleHandler != null){
-                   Message message = new Message();
-                   message.what= RUN_RESTART_MSG;
-                   bleHandler.sendMessage(message);
-               }
+                Log.d("ble_Status=", "connect fail" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                if (bleHandler != null) {
+                    Message message = new Message();
+                    message.what = RUN_RESTART_MSG;
+                    bleHandler.sendMessage(message);
+                }
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -371,39 +382,42 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
             @Override
             public void onDisconnect(boolean isActive) {
-                Log.d("ble_Status=", "disconnect"+ "[" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-               if(bleHandler != null){
-                   Message message = new Message();
-                   message.what = RUN_RESTART_MSG;
-                   bleHandler.sendMessage(message);
-                  // bt_clear();
-               }
+                Log.d("ble_Status=", "disconnect" + "[" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                if (bleHandler != null) {
+                    Message message = new Message();
+                    message.what = RUN_RESTART_MSG;
+                    bleHandler.sendMessage(message);
+                }
             }
         });
     }
-
     private void disconnectDevice(BluetoothLeDevice cDdvice) {
-        Log.d("ble_Status=", "disconnect device" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+        Log.d("ble_Status=", "disconnect device"  + cDdvice.getAddress() + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         //ViseBle.getInstance().disconnect(cDdvice);
         ViseBle.getInstance().disconnect();
-
     }
 
-    private void bt_clear(){
-        Log.d("ble_Status=", "bt clear" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+    private void bt_clear() {
+        Log.d("ble_Status=", "bt clear" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         ViseBle.getInstance().clear();
     }
 
     private void connect_device_period() {
         int deviceNum = adapter.getCount();
-        if(deviceNum != 0){
-            if(connectNum >= deviceNum){
+        if (deviceNum != 0) {
+            if (connectNum >= deviceNum) {
                 connectNum = 0;
             }
             mDevice = (BluetoothLeDevice) adapter.getItem(connectNum);
+            Log.d("ble_Status=", "start connect to " + mDevice.getAddress() + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(AutoConnectActivity.this, " start connect " + mDevice.getAddress(), Toast.LENGTH_SHORT).show();
+                }
+            });
             connectDevice(mDevice);
             connectNum++;
-            Log.d("ble_Status=", "connect item_" + connectNum +"at"+ deviceNum +" [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
         }
     }
 
@@ -411,52 +425,55 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if(mode){
+                if (mode) {
                     if (mDeviceMirror != null) {
-                        Log.d("ble_Status=", "set text name mac" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                        Log.d("ble_Status=", "set text name mac" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         mTv_Name.setText(String.format("Name: %s", mDeviceMirror.getBluetoothLeDevice().getName()));
                         mTv_Mac.setText(String.format("Mac: %s   RSSI: %ddB", mDeviceMirror.getBluetoothLeDevice().getAddress(), mDeviceMirror.getBluetoothLeDevice().getRssi()));
-                        Log.d("ble_Status=", "set text name mac2" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                        Log.d("ble_Status=", "set text name mac2" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     }
                     if (signatureData != null) {
-                        Log.d("ble_Status=", "set text signature!" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                        Log.d("ble_Status=", "set text signature!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         mTv_Signature.setText(String.format("Signature: %s", signatureData));
-                        Log.d("ble_Status=", "set text signature2!" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                        Log.d("ble_Status=", "set text signature2!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     }
                     if (batteryData != null) {
-                        Log.d("ble_Status=", "set text battery!" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                        Log.d("ble_Status=", "set text battery!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         mTv_Battery.setText(String.format("Battery: %s%%", batteryData[0]));
-                        Log.d("ble_Status=", "set text battery2!" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                        Log.d("ble_Status=", "set text battery2!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
 
                     }
-                }else {
-                    Log.d("ble_Status=", "clear info window" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                } else {
+                    Log.d("ble_Status=", "clear info window" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     clearUpdateConnectInfo();
-                    Log.d("ble_Status=", "clear info window 2" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                    Log.d("ble_Status=", "clear info window 2" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 }
             }
         });
     }
 
-    private void clearUpdateConnectInfo(){
-        Log.d("ble_Status=", "clearUpdateConnectInfo" +" [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+    private void clearUpdateConnectInfo() {
+        Log.d("ble_Status=", "clearUpdateConnectInfo" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         mTv_Name.setText("Name:");
         mTv_Mac.setText("Mac:");
         mTv_Signature.setText("Signature:");
         mTv_Battery.setText("Battery:");
     }
 
-    private  Handler dataHandler = new Handler(new Handler.Callback() {
+    private Handler dataHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            switch (message.what){
+            switch (message.what) {
                 case READ_BATTERY_MSG:
-                    Log.d("ble_Status=", "READ_BATTERY_MSG" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                    Log.d("ble_Status=", "READ_BATTERY_MSG" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     byte[] readBatteryData;
                     Bundle bundleBattery = message.getData();
-                    readBatteryData= bundleBattery.getByteArray(BATTERY_DATA);
-                    if(readBatteryData != null){
-                        Log.d("ble_Status=", "battery data: " +readBatteryData[0]+ "%"+ " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                    readBatteryData = bundleBattery.getByteArray(BATTERY_DATA);
+                    if(readBatteryData == null){
+                        return false;
+                    }
+                    if ((readBatteryData[0] >= 0) && (readBatteryData[0] <= 100)) {
+                        Log.d("ble_Status=", "battery data: " + readBatteryData[0] + "%" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         updateConnectInfoUi(true, null, null, readBatteryData);
                         Message message1 = new Message();
                         message1.what = RUN_RESTART_MSG;
@@ -468,13 +485,13 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                     break;
 
                 case READ_SIGNATURE_MSG:
-                    Log.d("ble_Status=", "READ_SIGNATURE_MSG" + " [" + Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                    Log.d("ble_Status=", "READ_SIGNATURE_MSG" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     byte[] readSignatureData;
                     Bundle bundleSignature = message.getData();
-                    readSignatureData= bundleSignature.getByteArray(SIGNATURE_DATA);
-                    if(readSignatureData != null){
-                        String str_read =  HexUtil.encodeHexStr(readSignatureData);
-                        Log.d("ble_Status="," signature data[ " + "len:"+readSignatureData.length + "  Data:" + str_read + " ]");
+                    readSignatureData = bundleSignature.getByteArray(SIGNATURE_DATA);
+                    if (readSignatureData != null) {
+                        String str_read = HexUtil.encodeHexStr(readSignatureData);
+                        Log.d("ble_Status=", " signature data[ " + "len:" + readSignatureData.length + "  Data:" + str_read + " ]");
                         updateConnectInfoUi(true, null, str_read, null);
                     }
                     bt_readBatteryEnergy();
@@ -483,7 +500,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                     break;
 
                 case READ_NOTIFY_MSG:
-                    Log.d("ble_Status","READ_NOTIFY_MSG" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                    Log.d("ble_Status", "READ_NOTIFY_MSG" + "[" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     //更新UI
                     break;
             }
@@ -494,13 +511,13 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     private Handler bleHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            switch (message.what){
+            switch (message.what) {
                 case START_SCAN_MSG:
-
-                    Log.d("ble_Status","START_SCAN_MSG + onDisconnect" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-                    if(mDevice != null){
-                        if(ViseBle.getInstance().isConnect(mDevice)){
-                            Log.d("ble_Status","START_SCAN_MSG_onDisconnect" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                    isTimeThreadBusy = false;
+                    Log.d("ble_Status", "START_SCAN_MSG" + "[" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    if (mDevice != null) {
+                        if (ViseBle.getInstance().isConnect(mDevice)) {
+                            Log.d("ble_Status", "START_SCAN_MSG_onDisconnect" + "[" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                             disconnectDevice(mDevice);
                             return true;
                         }
@@ -508,7 +525,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                     stop_scan();
                     bluetoothLeDeviceStore.clear();
                     adapter.clear();
-                    updateConnectInfoUi(false, null, null,null);
+                    updateConnectInfoUi(false, null, null, null);
                     start_scan();
                     // 停止当前扫描（如果有）
                     // 清空UI;
@@ -517,23 +534,23 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                     break;
 
                 case CONNECT_SUCCESS_MSG:
-                    Log.d("ble_Status","CONNECT_SUCCESS_MSG" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                    Log.d("ble_Status", "CONNECT_SUCCESS_MSG" + "[" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     updateConnectInfoUi(true, mDeviceMirror, null, null);
                     bt_readSignatureData();
                     break;
 
-                case
-                :
-                    Log.d("ble_Status","RUN_RESTART_MSG" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-                   if(isTimeThreadBusy){
-                       Log.d("ble_Status","isTimeThreadBusy" + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                case RUN_RESTART_MSG:
+
+                    Log.d("ble_Status", "RUN_RESTART_MSG" + "[" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    if (isTimeThreadBusy) {
+                        Log.d("ble_Status", "isTimeThreadBusy" + "[" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         return true;
-                   }else{
-                       isTimeThreadBusy = true;
-                       new Thread(new ThreadTime()).start();
-                   }
-                    if(message.arg1 == READ_BATTERY_MSG){
-                        Log.d("ble_Status","RUN_RESTART_MSG at READ_BATTERY_MSG " + "["+Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+                    } else {
+                        isTimeThreadBusy = true;
+                        new Thread(new ThreadTime()).start();
+                    }
+                    if (message.arg1 == READ_BATTERY_MSG) {
+                        Log.d("ble_Status", "RUN_RESTART_MSG at READ_BATTERY_MSG " + "[" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     }
                     // 启动定时器1
             }
@@ -621,17 +638,17 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         Message message = new Message();
         switch (view.getId()) {
             case R.id.bt_test:
-//                if(bleHandler != null){
-//                    message.what = START_SCAN_MSG;
-//                    bleHandler.sendMessage(message);
-//                }
-                ViseBle.getInstance().disconnect();
+                if(bleHandler != null){
+                    message.what = START_SCAN_MSG;
+                    bleHandler.sendMessage(message);
+                }
+                //ViseBle.getInstance().disconnect();
 //                if(timeThread != null){
 //                    timeThread.start();
 //                }
 
-               // message.what = UPDATE_TEXT;
-               // handler.sendMessage(message);
+                // message.what = UPDATE_TEXT;
+                // handler.sendMessage(message);
 //                new Thread(new Runnable() {
 //                    @Override
 //                    public void run() {
@@ -648,26 +665,27 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
                 break;
             default:
-               break;
+                break;
         }
     }
-    class ThreadTime implements Runnable{
+
+    class ThreadTime implements Runnable {
         @Override
         public void run() {
-           // while (true){
-                try{
-                    Log.d("ble_Status","Thread_Time_start" + " ["+ Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-                    Thread.sleep(5000);
-                    if(bleHandler != null){
-                        Message message = new Message();
-                        message.what = START_SCAN_MSG;
-                        bleHandler.sendMessage(message);
-                    }
-                    Log.d("ble_Status","ThreadTime timeout" + " ["+ Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
-                }catch (Exception e){
-                    Log.d("ble_Status",e.getStackTrace().toString() + " ["+ Thread.currentThread().getId()+"]"+" ["+ Thread.currentThread().getStackTrace()[2].getMethodName()+"]");
+            // while (true){
+            try {
+                Log.d("ble_Status", "Thread_Time_start" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                Thread.sleep(2000);
+                if (bleHandler != null) {
+                    Message message = new Message();
+                    message.what = START_SCAN_MSG;
+                    bleHandler.sendMessage(message);
                 }
-           // }
+                Log.d("ble_Status", "ThreadTime timeout" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+            } catch (Exception e) {
+                Log.d("ble_Status", e.getStackTrace().toString() + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+            }
+            // }
         }
     }
 }
