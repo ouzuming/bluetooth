@@ -139,7 +139,6 @@ public class ViseBle {
         startScan(new SingleFilterScanCallback(new IScanCallback() {
             @Override
             public void onDeviceFound(BluetoothLeDevice bluetoothLeDevice) {
-
             }
 
             @Override
