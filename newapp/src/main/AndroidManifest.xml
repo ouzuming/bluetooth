@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.vise.bledemo">
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,13 +18,21 @@
         <activity android:name=".activity.DeviceScanActivity" />
         <activity android:name=".activity.DeviceDetailActivity" />
         <activity android:name=".activity.DeviceControlActivity" />
-        <activity android:name=".activity.mybleActivity"
-                  android:label="Ble_Scan"/>
-        <activity android:name=".activity.ConnectActivity"
-                  android:label="Manual"/>
-        <activity android:name=".activity.AutoConnectActivity"
-                  android:label="Auto_Mode"/>
+        <activity
+            android:name=".activity.mybleActivity"
+            android:label="Ble_Scan" />
+        <activity
+            android:name=".activity.ConnectActivity"
+            android:label="Manual" />
+        <activity
+            android:name=".activity.AutoConnectActivity"
+            android:label="Auto_Mode" />
         <activity android:name=".activity.functinSelectActivity" />
+
+        <service
+            android:name=".service.MyService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
