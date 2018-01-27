@@ -40,7 +40,7 @@ public class mybleActivity extends AppCompatActivity implements View.OnClickList
 
     private void Ble_config_init(){
         ViseBle.config()
-                .setScanTimeout(10000)
+                .setScanTimeout(5000)
                 .setConnectTimeout(10*1000)
                 .setOperateRetryCount(3)
                 .setConnectRetryInterval(1000)
@@ -78,11 +78,18 @@ public class mybleActivity extends AppCompatActivity implements View.OnClickList
         ViseBle.getInstance().startScan(new ScanCallback(new IScanCallback() {
             @Override
             public void onDeviceFound(BluetoothLeDevice bluetoothLeDevice) {
-                Log.d("ble_Status","device found:"+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
-                if(!bluetoothLeDevice.getName().equalsIgnoreCase(ble_name)){
-                    Log.d("ble_Status","add device name: "+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
+                if(bluetoothLeDevice == null){
                     return;
                 }
+                if(bluetoothLeDevice.getName() == null){
+                    return;
+                }
+               // Log.d("ble_Status","device found:"+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
+                if(!bluetoothLeDevice.getName().equalsIgnoreCase(ble_name)){
+                   // Log.d("ble_Status","add device name: "+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
+                    return;
+                }
+                Log.d("ble_Status","add device name: "+bluetoothLeDevice.getName()+bluetoothLeDevice.getAddress());
                 bluetoothLeDeviceStore.addDevice(bluetoothLeDevice);
                 runOnUiThread(new Runnable() {
                     @Override

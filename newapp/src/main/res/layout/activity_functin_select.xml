@@ -14,4 +14,12 @@
         android:layout_height="50dp"
         android:text="manual"
         android:paddingTop="20dp"/>
+
+    <Button
+        android:id="@+id/bt_file"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="file Operate"
+        android:paddingTop="20dp"/>
+
 </LinearLayout>

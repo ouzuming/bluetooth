@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/bt_writeFile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="write"/>
+    <Button
+        android:id="@+id/bt_readFile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="read"/>
+
+    <Button
+        android:id="@+id/bt_getSensor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:text="get sensor"/>
+    <TextView
+        android:id="@+id/tv_Sensor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="sensor data:"/>
+
+</LinearLayout>

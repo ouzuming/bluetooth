@@ -1,8 +1,12 @@
 package com.vise.bledemo.activity;
 
+import android.app.Service;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -56,8 +60,8 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
     private boolean isTimeThreadBusy = false;
 
     // private String ble_name = "dylan";
-    private String ble_name = "i3vr controller";
-     //private String ble_name = "i3vr";
+    //private String ble_name = "i3vr controller";
+     private String ble_name = "i3vr";
 
 
     Button mBt_function;
@@ -126,14 +130,14 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
 
     private void Ble_config_init() {
         ViseBle.config()
-                .setScanTimeout(5000)//扫描超时时间，这里设置为永久扫描
-                .setConnectTimeout(3000)//连接超时时间
+                .setScanTimeout(10000)//扫描超时时间
+                .setConnectTimeout(10000)//连接超时时间
                 .setOperateTimeout(5 * 1000)//设置数据操作超时时间
                 .setConnectRetryCount(3)//设置连接失败重试次数
-                .setConnectRetryInterval(1000)//设置连接失败重试间隔时间
+                .setConnectRetryInterval(500)//设置连接失败重试间隔时间
                 .setOperateRetryCount(3)//设置数据操作失败重试次数
-                .setOperateRetryInterval(1000)//设置数据操作失败重试间隔时间
-                .setMaxConnectCount(3);//设置最大连接设备数量
+                .setOperateRetryInterval(500)//设置数据操作失败重试间隔时间
+                .setMaxConnectCount(6);//设置最大连接设备数量
         ViseBle.getInstance().init(this);//蓝牙信息初始化，全局唯一，必须在应用初始化时调用
     }
 
@@ -320,7 +324,6 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                 }
             }
         }, bluetoothGattChannel);
-
     }
 
     private void bt_readData(DeviceMirror deviceMirror, String serviceUUID, String readUUID) {
@@ -623,6 +626,8 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+
+
     class ThreadTime implements Runnable {
         @Override
         public void run() {
@@ -661,5 +666,15 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
             // }
         }
     }
+
+    public class MyService extends Service{
+
+        @Nullable
+        @Override
+        public IBinder onBind(Intent intent) {
+            return null;
+        }
+    }
+
 
 }

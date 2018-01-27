@@ -8,7 +8,7 @@ import android.widget.Button;
 
 import com.vise.bledemo.R;
 public class functinSelectActivity extends AppCompatActivity implements View.OnClickListener {
-    Button mbt_atuo, mbt_manual;
+    Button mbt_atuo, mbt_manual, mbt_file;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,8 +19,10 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
     private void widget_init(){
         mbt_atuo = findViewById(R.id.bt_auto);
         mbt_manual = findViewById(R.id.bt_manual);
+        mbt_file = findViewById(R.id.bt_file);
         mbt_atuo.setOnClickListener(this);
         mbt_manual.setOnClickListener(this);
+        mbt_file.setOnClickListener(this);
     }
 
     @Override
@@ -32,6 +34,10 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
                 break;
             case R.id.bt_manual:
                 intent = new Intent(functinSelectActivity.this,mybleActivity.class);
+                break;
+
+            case R.id.bt_file:
+                intent = new Intent(functinSelectActivity.this,fileActivity.class);
                 break;
         }
         startActivity(intent);

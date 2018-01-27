@@ -11,14 +11,35 @@
             android:id="@+id/bt_connect"
             android:layout_width="150dp"
             android:layout_height="80dp"
-            android:text="connect"/>
-        <Button
-            android:id="@+id/bt_disconnect"
-            android:layout_width="150dp"
-            android:layout_height="80dp"
-            android:layout_marginLeft="30dp"
-            android:text="disconnect"/>
+            android:text="CONNECT"/>
      </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="#EEC211"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/et_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="15"
+            android:hint="path"
+
+            />
+        <Button
+            android:id="@+id/bt_browse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="browse"
+            android:textAllCaps="false"
+            />
+    </LinearLayout>
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

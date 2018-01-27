@@ -789,6 +789,7 @@ public class DeviceMirror {
             }
             ViseLog.i("connectFailure " + bleException);
         }
+
     }
 
     /**

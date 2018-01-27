@@ -1,15 +1,19 @@
 package com.vise.bledemo.activity;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,7 +30,11 @@ import com.vise.baseble.model.resolver.GattAttributeResolver;
 import com.vise.baseble.utils.HexUtil;
 import com.vise.bledemo.R;
 import com.vise.bledemo.common.BluetoothDeviceManager;
+import com.vise.bledemo.myClass.MyFileHandle;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,13 +60,18 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
     public static final String NOTIFY_CHARACTERISTIC_UUID_KEY = "notify_uuid_key";
     public static final String WRITE_DATA_KEY = "write_data_key";
 
+    private static final int CONNECT_SUCCESS_MSG = 0;
+    private static final int DISCONNECT_MSG = 1;
+    private static final int FILE_DATA_MSG = 2;
+    private static final String FILEDATAKEY = "FILEDATA";
+
     private  byte[] write_data = {0x01,0x02,0x03,0x04,0x05};
     public static final String CONNECT_DEVICE = "connect_device";
     private BluetoothLeDevice mDevice;
     private TextView mTv_conInfo;
     private StringBuilder sb_btInfo;
-    private Button mBt_connect,mBt_disconnect,mBt_write,mBt_read,mBt_notify,mBt_battery;
-    private String devName = "i3vr";
+    private Button mBt_connect,mBt_write,mBt_read,mBt_notify,mBt_battery,mBt_browse;
+    private EditText mEt_path;
     private List<BluetoothGattService> mGattServices = new ArrayList<>();
     private List<List<BluetoothGattCharacteristic>> mGattCharacteristics = new ArrayList<>();
     private DeviceMirror mDeviceMirror;
@@ -68,28 +81,36 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect);
         widget_init();
-        showConnectInfo(mDevice);
+       MyFileHandle.verifyStoragePermissions(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        System.exit(0);
+        super.onDestroy();
     }
 
     private void widget_init(){
         mDevice = getIntent().getParcelableExtra(CONNECT_DEVICE);
         mTv_conInfo = findViewById(R.id.tv_conInfo);
         sb_btInfo = new StringBuilder();
+        mEt_path = findViewById(R.id.et_path);
         mBt_connect = findViewById(R.id.bt_connect);
-        mBt_disconnect = findViewById(R.id.bt_disconnect);
         mBt_write = findViewById(R.id.bt_write);
         mBt_read = findViewById(R.id.bt_read);
         mBt_notify = findViewById(R.id.bt_notify);
         mBt_battery = findViewById(R.id.bt_battery);
+        mBt_browse = findViewById(R.id.bt_browse);
         mBt_connect.setOnClickListener(this);
-        mBt_disconnect.setOnClickListener(this);
         mBt_write.setOnClickListener(this);
         mBt_read.setOnClickListener(this);
         mBt_notify.setOnClickListener(this);
         mBt_battery.setOnClickListener(this);
+        mBt_browse.setOnClickListener(this);
     }
+
     private void showConnectInfo(BluetoothLeDevice cDevice){
-        Log.d("thread", "showConnectInfo current Thread's name:" +  Thread.currentThread().getName());
+        Log.d("ble_Status=", "show connect info" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         sb_btInfo.append("name: ").append(cDevice.getName()).append("\n")
                 .append("MAC：").append(cDevice.getAddress()).append("\n")
                 .append("rssi: ").append(cDevice.getRssi()).append("\n");
@@ -109,8 +130,8 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onSuccess(byte[] data, BluetoothGattChannel bluetoothGattChannel, BluetoothLeDevice bluetoothLeDevice) {
                 Log.d("ble_Status=","write success!!");
-                String str_write =  HexUtil.encodeHexStr(data);
-                Log.d("ble_Status=","len:"+data.length+"  Data:"+ str_write);
+               // String str_write =  HexUtil.encodeHexStr(data);
+               // Log.d("ble_Status=","len:"+data.length+"  Data:"+ str_write);
             }
 
             @Override
@@ -183,13 +204,57 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
 
     private void bt_writeData(DeviceMirror deviceMirror,byte[] data){
         if(deviceMirror != null) {
-            Log.d("ble_Status=","write data");
-            Log.d("thread", "bt_writeData  current Thread's name:" +  Thread.currentThread().getName());
+            Log.d("ble_Status", "bt write data" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
             deviceMirror.writeData(data);
-            //BluetoothDeviceManager.getInstance().write(mDevice,data);
+           // BluetoothDeviceManager.getInstance().write(mDevice,data);
         }
     }
+    private void bt_sendFileData(final DeviceMirror deviceMirror, final byte[] data){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final int btSendLenth = 20;
+                int writePackage = data.length / btSendLenth;
+                int dataAddr = 0;
+                List<byte[]> fileList = new ArrayList<byte[]>();
 
+                if(deviceMirror != null){
+                    Log.d("ble_Status", "bt write file data" + HexUtil.encodeHexStr(data) + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    for(int i = 0; i< writePackage; i++){
+                        byte[] fileByte = new byte[btSendLenth];
+                       System.arraycopy(data,dataAddr,fileByte,0,btSendLenth);
+                       // Log.d("ble_Status","dataAddr" + dataAddr + "   copy_data:  " + HexUtil.encodeHexStr(fileByte) + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                       dataAddr += btSendLenth;
+                       fileList.add(fileByte);
+//                        for(int j = 0; j< fileList.size(); j++){
+//                            Log.d("ble_Status", "fileList_2:  "+ HexUtil.encodeHexStr(fileList.get(j)) + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+//                        }
+                    }
+
+                    if((data.length % btSendLenth) > 0){
+                        byte[] fileByte = new byte[data.length % btSendLenth];
+                        System.arraycopy(data,dataAddr,fileByte,0,data.length % btSendLenth);
+                        fileList.add(fileByte);
+                        writePackage++;
+                    }
+                    Log.d("ble_Status", "writePackage= " + writePackage + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    for(int i = 0; i< writePackage; i++){
+                        Log.d("ble_Status", "len:"+ fileList.get(i).length +"  write data:  "+ HexUtil.encodeHexStr(fileList.get(i)) + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                        deviceMirror.writeData(fileList.get(i));
+                        try {
+                            Log.d("ble_Status", "thread sleep  " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            Log.d("ble_Status", "thread sleep catch  " + e + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+            }
+        }).start();
+
+    }
     private void bt_readData(DeviceMirror deviceMirror,String serviceUUID, String readUUID){
         if(deviceMirror != null) {
             bt_readData_init(deviceMirror,serviceUUID, readUUID);
@@ -276,7 +341,11 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
                // displayGattServices(deviceMirror.getBluetoothGatt().getServices());
                 mDeviceMirror = deviceMirror;
                 bt_writeData_init(mDeviceMirror);
-                bt_notifyData_init(mDeviceMirror);
+                //bt_notifyData_init(mDeviceMirror);
+//                Message message = new Message();
+//                message.what = CONNECT_SUCCESS_MSG;
+//                cHandler.sendMessage(message);
+                cHandler.obtainMessage(CONNECT_SUCCESS_MSG).sendToTarget();
             }
 
             @Override
@@ -287,6 +356,10 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onDisconnect(boolean isActive) {
                 Log.d("ble_Status=","disconnect");
+//                Message message = new Message();
+//                message.what = DISCONNECT_MSG;
+//                cHandler.sendMessage(message);
+                cHandler.obtainMessage(DISCONNECT_MSG).sendToTarget();
             }
         });
     }
@@ -295,20 +368,112 @@ public class ConnectActivity extends AppCompatActivity implements View.OnClickLi
         ViseBle.getInstance().disconnect(cDdvice);
     }
 
+
+    private Handler cHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message message) {
+            switch (message.what){
+                case CONNECT_SUCCESS_MSG:
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ConnectActivity.this, "connect success",Toast.LENGTH_SHORT).show();
+                            if(mBt_connect.getText().equals("CONNECT")){
+                                mBt_connect.setText("DISCONNECT");
+                                showConnectInfo(mDevice);
+                            }
+                        }
+                    });
+                    break;
+                case DISCONNECT_MSG:
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ConnectActivity.this, "disconnect",Toast.LENGTH_SHORT).show();
+                            if(mBt_connect.getText().equals("DISCONNECT")){
+                                mBt_connect.setText("CONNECT");
+                            }
+                            mTv_conInfo.setText("");
+                        }
+                    });
+                    break;
+                case FILE_DATA_MSG:
+                    Bundle bundle = message.getData();
+                    byte[] getFileData = bundle.getByteArray(FILEDATAKEY);
+                    String str_read = HexUtil.encodeHexStr(getFileData);
+                  //  Log.d("ble_Status", "get file data length: "+ getFileData.length + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    Log.d("ble_Status", "length" + getFileData.length +"get file data: "+ str_read + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                  //  Log.d("ble_Status", "start write file data: " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    bt_sendFileData(mDeviceMirror, getFileData);
+
+                    break;
+            }
+            return true;
+        }
+    });
     @Override
     public void onClick(View view) {
+        String defaultPath = "";
         switch (view.getId()){
             case R.id.bt_connect:
-                Log.d("ble_Status=","onClick_bt_connect");
-                Log.d("ble_Status=","connecting...");
-                connectDevice(mDevice);
-                mTv_conInfo.setText(sb_btInfo.toString());
+                if(mBt_connect.getText().equals("CONNECT")){
+                    Log.d("ble_Status", "connect button click" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                   if(mDevice != null){
+                       connectDevice(mDevice);
+                   }
+                }else{
+                    Log.d("ble_Status", "disconnect button click" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    if(mDevice != null){
+                        disconnectDevice(mDevice);
+                    }
+                }
                 break;
 
-            case R.id.bt_disconnect:
-                Log.d("ble_Status=","onClick_bt_disconnect");
-                disconnectDevice(mDevice);
-                finish();
+            case R.id.bt_browse:
+                Log.d("ble_Status", "browse button click" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                if(MyFileHandle.isSdCardExist()){
+                    Log.d("ble_Status", "sdcard is on" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    String sdPath = MyFileHandle.getSdCardPath();
+                    Log.d("ble_Status", "sd card path: " + sdPath+ " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                }else {
+                    Log.d("ble_Status", "sdcard is off" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                }
+
+                if(MyFileHandle.getDefaultFilePath() != null){
+                    defaultPath = MyFileHandle.getDefaultFilePath();
+                    Log.d("ble_Status", "default file path: " +defaultPath+ " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                }else {
+                    Log.d("ble_Status", "default file is not exist: "+ " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                }
+                Log.d("ble_Status", "get file stream!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                FileInputStream fileStream = MyFileHandle.getFileInputStream();
+                if(fileStream == null){
+                    Log.d("ble_Status", "error: fileStream == null!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    return;
+                }
+                byte[] fileData = null;
+                try {
+                    mEt_path.setText(defaultPath);
+                    Log.d("ble_Status", "fileData!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    fileData = new byte[fileStream.available()];
+                    Log.d("ble_Status", "fileStream read!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    fileStream.read(fileData);
+                    Log.d("ble_Status", "HexUtil!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    String str_read = HexUtil.encodeHexStr(fileData);
+                    Log.d("ble_Status", "file data length: "+ fileData.length + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    Log.d("ble_Status", "file data1: "+ str_read + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    Message message = new Message();
+                    message.what = FILE_DATA_MSG;
+                    Bundle bundle = new Bundle();
+                    bundle.putByteArray(FILEDATAKEY,fileData);
+                    message.setData(bundle);
+                    cHandler.sendMessage(message);
+
+                    Log.d("ble_Status", "cHandler sendMessage " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                } catch (IOException e) {
+                    Log.d("ble_Status", "error!" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    e.printStackTrace();
+                }
                 break;
 
             case R.id.bt_write:
