@@ -1,6 +1,7 @@
 package com.vise.bledemo.activity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Environment;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,10 +22,17 @@ import com.vise.bledemo.R;
 import java.io.File;
 import java.io.IOException;
 
-public class mediaPlayerActivity extends AppCompatActivity implements View.OnClickListener {
+public class mediaPlayerActivity extends AppCompatActivity implements View.OnClickListener  {
     Button btn_mediaPlay,btn_mediaPause,btn_mediaStop;
-    TextView tv_mediaStatus;
+    TextView tv_mediaStatus ,tv_progressPercent,tv_mediaTime;
     MediaPlayer mediaPlayer = new MediaPlayer();
+    ProgressBar musicProgressBar;
+    private static final int musicProgressMax = 100;
+    private int mediaTotalLength = 0;
+    private int currentPosition;
+    private int percent;
+    private int musicCurrentPosition = 0;
+    private static  boolean musicPlayFlag = false;
     private static final String musicName = "music.mp3";
     private static final String TAG = "mediaPlay";
     @Override
@@ -31,7 +40,7 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media_player);
         widgetInit();
-
+        progressBarInit();
         if(ContextCompat.checkSelfPermission(mediaPlayerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
             Log.d(TAG, "apply for permission" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
             ActivityCompat.requestPermissions(mediaPlayerActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE },1);
@@ -40,6 +49,12 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
             Log.d(TAG, "start init mediaPlayer" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
             mediaPlayerInit();
         }
+    }
+
+    private void progressBarInit() {
+        musicProgressBar = findViewById(R.id.pb_musicProgress);
+        musicProgressBar.setMax(musicProgressMax);
+        musicProgressBar.setProgress(0);
     }
 
     @Override
@@ -54,7 +69,6 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
                     Toast.makeText(mediaPlayerActivity.this,"permission refuse",Toast.LENGTH_SHORT).show();
                 }
                 break;
-
                 default:break;
         }
     }
@@ -70,6 +84,28 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
             Log.d(TAG, "set data sourse erroe: "+ e + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
             e.printStackTrace();
         }
+         mediaTotalLength = mediaGetDuration();
+        Log.d(TAG, "media total length: "+ mediaTotalLength + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+
+            }
+        });
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+
+            }
+        });
+
+        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                return false;
+            }
+        });
     }
 
     private void widgetInit() {
@@ -77,6 +113,8 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
         btn_mediaPause = findViewById(R.id.mediaPause);
         btn_mediaStop = findViewById(R.id.mediaStop);
         tv_mediaStatus = findViewById(R.id.tv_mediaPlayerStatus);
+        tv_progressPercent = findViewById(R.id.progressPercent);
+        tv_mediaTime = findViewById(R.id.mediaTime);
         btn_mediaPlay.setOnClickListener(this);
         btn_mediaPause.setOnClickListener(this);
         btn_mediaStop.setOnClickListener(this);
@@ -98,7 +136,6 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
                 Log.d(TAG, "mediaStop " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 mediaStop();
                 break;
-
         }
     }
 
@@ -115,7 +152,6 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
         Log.d(TAG, "mediaStop " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         mediaPlayer.pause();
         mediaPlayer.stop();
-        //mediaPlayerInit();
         mediaStatus("stop");
         try {
             mediaPlayer.prepare();
@@ -135,13 +171,60 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
     private void mediaPlay() {
         if(!mediaPlayer.isPlaying()){
             Log.d(TAG, "mediaPlay " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-
             mediaPlayer.start();
             if(mediaPlayer.isPlaying()){
                 mediaStatus("playing");
+                startProgressBarThread();
             }
         }
     }
+
+    private void  startProgressBarThread(){
+        musicPlayFlag = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (musicPlayFlag){
+                    Log.d(TAG, "musicCurrentPosition = " + getCurrentPositionPercent() + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    musicProgressBar.setProgress(getCurrentPositionPercent());
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        }).start();
+    }
+    private int getCurrentPositionPercent() {
+
+        currentPosition = mediaGetCurrentPosition();
+        if(currentPosition >= mediaTotalLength){
+            Log.d(TAG, "the end of media = " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+            musicPlayFlag = false;
+            percent = musicProgressMax;
+        }else {
+            percent = (currentPosition * musicProgressMax) / mediaTotalLength;
+        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tv_progressPercent.setText(percent+"%");
+                tv_mediaTime.setText(currentPosition + "/" + mediaTotalLength);
+            }
+        });
+        return  percent;
+    }
+    // uint:ms
+    private int mediaGetDuration(){
+       return mediaPlayer.getDuration();
+    }
+
+    private int mediaGetCurrentPosition(){
+        return  mediaPlayer.getCurrentPosition();
+    }
+
 
     @Override
     protected void onDestroy() {
