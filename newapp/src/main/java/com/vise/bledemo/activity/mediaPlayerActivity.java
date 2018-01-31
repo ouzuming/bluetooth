@@ -25,7 +25,7 @@ import java.io.IOException;
 public class mediaPlayerActivity extends AppCompatActivity implements View.OnClickListener  {
     Button btn_mediaPlay,btn_mediaPause,btn_mediaStop;
     TextView tv_mediaStatus ,tv_progressPercent,tv_mediaTime;
-    MediaPlayer mediaPlayer = new MediaPlayer();
+    MediaPlayer mediaPlayer;
     ProgressBar musicProgressBar;
     private static final int musicProgressMax = 100;
     private int mediaTotalLength = 0;
@@ -74,6 +74,7 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void mediaPlayerInit() {
+        mediaPlayer = new MediaPlayer();
         mediaReset();
         File file = new File(Environment.getExternalStorageDirectory(),musicName);
         try {
@@ -162,8 +163,7 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
         mediaPlayer.pause();
         mediaPlayer.stop();
         mediaStatus("stop");
-        tv_progressPercent.setText("0%");
-        tv_mediaTime.setText("0/0");
+        setProgressBarStatus(0, 0 );
         btn_mediaPlay.setEnabled(true);
         btn_mediaStop.setEnabled(false);
         btn_mediaPause.setEnabled(false);
@@ -212,8 +212,12 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if(mediaPlayer.isPlaying() ){
-                        musicProgressBar.setProgress(getCurrentPositionPercent());
+                    if(mediaPlayer != null){
+                        if(mediaPlayer.isPlaying() ){
+                            musicProgressBar.setProgress(getCurrentPositionPercent());
+                        }
+                    }else {
+                        musicPlayFlag = false;
                     }
                 }
             }
@@ -232,8 +236,7 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                tv_progressPercent.setText(percent+"%");
-                tv_mediaTime.setText(currentPosition/1000 + "/" + mediaTotalLength/1000);
+                setProgressBarStatus(percent, currentPosition );
             }
         });
         return  percent;
@@ -247,13 +250,20 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
         return  mediaPlayer.getCurrentPosition();
     }
 
+    private void  setProgressBarStatus(int cPercent, int cPosition ){
+        tv_progressPercent.setText(cPercent+"%");
+        tv_mediaTime.setText(cPosition/1000 + "/" + mediaTotalLength/1000);
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        musicPlayFlag = false;
         if(mediaPlayer != null){
             mediaPlayer.stop();
+            mediaPlayer.reset();
             mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 }

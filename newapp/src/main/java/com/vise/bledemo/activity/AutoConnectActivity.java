@@ -135,7 +135,7 @@ public class AutoConnectActivity extends AppCompatActivity implements View.OnCli
                 .setOperateTimeout(5 * 1000)//设置数据操作超时时间
                 .setConnectRetryCount(3)//设置连接失败重试次数
                 .setConnectRetryInterval(500)//设置连接失败重试间隔时间
-                .setOperateRetryCount(5)//设置数据操作失败重试次数
+                .setOperateRetryCount(10)//设置数据操作失败重试次数
                 .setOperateRetryInterval(1000)//设置数据操作失败重试间隔时间
                 .setMaxConnectCount(6);//设置最大连接设备数量
         ViseBle.getInstance().init(this);//蓝牙信息初始化，全局唯一，必须在应用初始化时调用
