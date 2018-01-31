@@ -7,25 +7,38 @@
         android:id="@+id/bt_auto"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="auto" />
+        android:text="auto"
+        android:textAllCaps="false"/>
     <Button
         android:id="@+id/bt_manual"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="manual"
-        android:paddingTop="20dp"/>
+        android:paddingTop="20dp"
+        android:textAllCaps="false"/>
 
     <Button
         android:id="@+id/bt_file"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="file Operate"
-        android:paddingTop="20dp"/>
+        android:paddingTop="20dp"
+        android:textAllCaps="false"/>
 
     <Button
         android:id="@+id/bt_photo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="photo" />
+        android:text="photo"
+        android:paddingTop="20dp"
+        android:textAllCaps="false"/>
+
+    <Button
+        android:id="@+id/bt_mediaPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="mediaPlayer"
+        android:paddingTop="20dp"
+        android:textAllCaps="false"/>
 
 </LinearLayout>

@@ -4,34 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    >
     <Button
-        android:id="@+id/bt_openCamera"
+        android:layout_gravity="center"
+        android:id="@+id/bt_selectPhoto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="open_camera"
+        android:text="selectPhoto"
         android:textAllCaps="false" />
-    <Button
-        android:layout_marginLeft="20dp"
-        android:id="@+id/bt_openAlbum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="open_album"
-        android:textAllCaps="false" />
-
-        <Button
-            android:layout_marginLeft="20dp"
-            android:id="@+id/bt_selectPhoto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="selectPhoto"
-            android:textAllCaps="false" />
-    </LinearLayout>
-
 
     <ImageView
         android:layout_marginLeft="30dp"

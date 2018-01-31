@@ -7,8 +7,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SENSOR_INFO" />
     <uses-permission android:name="android.permission.SENSOR_ENABLE" />
-   <!--<uses-permission android:name="android.permission.CAMERA" />-->
 
+    <!-- <uses-permission android:name="android.permission.CAMERA" /> -->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,13 +19,12 @@
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.cameraalbumtest.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true"
-            >
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"/>
-
+                android:resource="@xml/file_paths" />
         </provider>
+
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,7 +52,8 @@
             android:exported="true" />
 
         <activity android:name=".activity.fileActivity" />
-        <activity android:name=".activity.photoActivity"></activity>
+        <activity android:name=".activity.photoActivity" />
+        <activity android:name=".activity.mediaPlayerActivity"></activity>
     </application>
 
 </manifest>

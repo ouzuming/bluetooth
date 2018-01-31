@@ -39,7 +39,7 @@ import java.io.IOException;
 import static android.Manifest.*;
 
 public class photoActivity extends AppCompatActivity implements View.OnClickListener{
-    Button btn_openCamera,btn_openAlbum,btn_selectPhoto;
+    Button btn_selectPhoto;
     ImageView iv_photo;
     private Uri imageUri;
     public static final int TAKE_PHOTO = 1;
@@ -50,12 +50,8 @@ public class photoActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
-        btn_openCamera = findViewById(R.id.bt_openCamera);
-        btn_openAlbum = findViewById(R.id.bt_openAlbum);
         btn_selectPhoto = findViewById(R.id.bt_selectPhoto);
         iv_photo = findViewById(R.id.iv_photo);
-        btn_openCamera.setOnClickListener(this);
-        btn_openAlbum.setOnClickListener(this);
         btn_selectPhoto.setOnClickListener(this);
     }
     private void takePhoto(){
@@ -80,15 +76,6 @@ public class photoActivity extends AppCompatActivity implements View.OnClickList
         startActivityForResult(intent,TAKE_PHOTO);
     }
 
-    private void choosePhoto() {
-//        if(ContextCompat.checkSelfPermission(photoActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-//            ActivityCompat.requestPermissions(photoActivity.this,new String[]{permission.WRITE_EXTERNAL_STORAGE},1);
-//        }else{
-//            openAlbum();
-//        }
-        openAlbum();
-    }
-
     private void openAlbum() {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
@@ -99,32 +86,12 @@ public class photoActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.bt_openCamera:
-                Log.d(TAG, "open camera" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                takePhoto();
-                break;
-            case R.id.bt_openAlbum:
-                Log.d(TAG, "open album" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                choosePhoto();
-                break;
-
             case R.id.bt_selectPhoto:
                 Log.d(TAG, "select get photo mode" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 showTypeDialog();
+
         }
     }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        switch (requestCode){
-//            case 1: if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-//                openAlbum();
-//            }else {
-//                Toast.makeText(this,"you denied the permission",Toast.LENGTH_SHORT).show();
-//            }
-//            break;
-//        }
-//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -148,6 +115,7 @@ public class photoActivity extends AppCompatActivity implements View.OnClickList
             default:break;
         }
     }
+
 
     private File getFilePath(Uri uri) {
         String[] proj = {MediaStore.Images.Media.DATA};
@@ -190,5 +158,6 @@ public class photoActivity extends AppCompatActivity implements View.OnClickList
         dialog.setView(view);
         dialog.show();
     }
+
 
 }

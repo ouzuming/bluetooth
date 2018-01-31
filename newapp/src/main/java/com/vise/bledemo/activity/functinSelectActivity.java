@@ -8,7 +8,7 @@ import android.widget.Button;
 
 import com.vise.bledemo.R;
 public class functinSelectActivity extends AppCompatActivity implements View.OnClickListener {
-    Button mbt_atuo, mbt_manual, mbt_file, mbt_photo;
+    Button mbt_atuo, mbt_manual, mbt_file, mbt_photo, mbt_mediaPlayer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,10 +21,12 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
         mbt_manual = findViewById(R.id.bt_manual);
         mbt_file = findViewById(R.id.bt_file);
         mbt_photo = findViewById(R.id.bt_photo);
+        mbt_mediaPlayer = findViewById(R.id.bt_mediaPlayer);
         mbt_atuo.setOnClickListener(this);
         mbt_manual.setOnClickListener(this);
         mbt_file.setOnClickListener(this);
         mbt_photo.setOnClickListener(this);
+        mbt_mediaPlayer.setOnClickListener(this);
     }
 
     @Override
@@ -43,6 +45,10 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
                 break;
             case R.id.bt_photo:
                 intent = new Intent(functinSelectActivity.this,photoActivity.class);
+                break;
+
+            case R.id.bt_mediaPlayer:
+                intent = new Intent(functinSelectActivity.this,mediaPlayerActivity.class);
                 break;
 
         }
