@@ -31,7 +31,7 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
     private int mediaTotalLength = 0;
     private int currentPosition;
     private int percent;
-    private int musicCurrentPosition = 0;
+    private static boolean isPrepare = false;
     private static  boolean musicPlayFlag = false;
     private static final String musicName = "music.mp3";
     private static final String TAG = "mediaPlay";
@@ -89,7 +89,14 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-
+                Log.d(TAG, "media on prepared: " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                isPrepare = true;
+                mediaPlayer.start();
+                btn_mediaPlay.setEnabled(false);
+                btn_mediaStop.setEnabled(true);
+                btn_mediaPause.setEnabled(true);
+                mediaStatus("playing");
+                startProgressBarThread();
             }
         });
 
@@ -146,35 +153,50 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
     private void mediaReset() {
         Log.d(TAG, "mediaReset " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         mediaPlayer.reset();
+        isPrepare = false;
     }
 
     private void mediaStop() {
         Log.d(TAG, "mediaStop " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+        musicPlayFlag = false;
         mediaPlayer.pause();
         mediaPlayer.stop();
         mediaStatus("stop");
-        try {
-            mediaPlayer.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        tv_progressPercent.setText("0%");
+        tv_mediaTime.setText("0/0");
+        btn_mediaPlay.setEnabled(true);
+        btn_mediaStop.setEnabled(false);
+        btn_mediaPause.setEnabled(false);
+        isPrepare = false;
     }
 
     private void mediaPause() {
         if(mediaPlayer.isPlaying()){
             Log.d(TAG, "mediaPause " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
            mediaPlayer.pause();
+            btn_mediaPlay.setEnabled(true);
+            btn_mediaStop.setEnabled(true);
+            btn_mediaPause.setEnabled(false);
             mediaStatus("pause");
         }
     }
 
     private void mediaPlay() {
+        Log.d(TAG, "mediaPlay " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         if(!mediaPlayer.isPlaying()){
-            Log.d(TAG, "mediaPlay " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-            mediaPlayer.start();
-            if(mediaPlayer.isPlaying()){
+            if(isPrepare == false){
+                try {
+                    Log.d(TAG, "prepare "+ " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                    mediaPlayer.prepare();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                mediaPlayer.start();
+                btn_mediaPlay.setEnabled(false);
+                btn_mediaStop.setEnabled(true);
+                btn_mediaPause.setEnabled(true);
                 mediaStatus("playing");
-                startProgressBarThread();
             }
         }
     }
@@ -185,33 +207,33 @@ public class mediaPlayerActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void run() {
                 while (musicPlayFlag){
-                    Log.d(TAG, "musicCurrentPosition = " + getCurrentPositionPercent() + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                    musicProgressBar.setProgress(getCurrentPositionPercent());
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
+                    if(mediaPlayer.isPlaying() ){
+                        musicProgressBar.setProgress(getCurrentPositionPercent());
+                    }
                 }
             }
         }).start();
     }
     private int getCurrentPositionPercent() {
-
         currentPosition = mediaGetCurrentPosition();
-        if(currentPosition >= mediaTotalLength){
+        if((currentPosition / 1000) >= (mediaTotalLength / 1000) ){
             Log.d(TAG, "the end of media = " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
             musicPlayFlag = false;
             percent = musicProgressMax;
         }else {
             percent = (currentPosition * musicProgressMax) / mediaTotalLength;
         }
+       // Log.d(TAG, "currentPosition = " + currentPosition + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 tv_progressPercent.setText(percent+"%");
-                tv_mediaTime.setText(currentPosition + "/" + mediaTotalLength);
+                tv_mediaTime.setText(currentPosition/1000 + "/" + mediaTotalLength/1000);
             }
         });
         return  percent;
