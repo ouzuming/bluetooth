@@ -8,7 +8,8 @@ import android.widget.Button;
 
 import com.vise.bledemo.R;
 public class functinSelectActivity extends AppCompatActivity implements View.OnClickListener {
-    Button mbt_atuo, mbt_manual, mbt_file, mbt_photo, mbt_mediaPlayer;
+    Button mbt_atuo, mbt_manual, mbt_file, mbt_photo, mbt_mediaPlayer,mbt_video;
+    Button mbt_webView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,11 +23,15 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
         mbt_file = findViewById(R.id.bt_file);
         mbt_photo = findViewById(R.id.bt_photo);
         mbt_mediaPlayer = findViewById(R.id.bt_mediaPlayer);
+        mbt_video = findViewById(R.id.bt_video);
+        mbt_webView = findViewById(R.id.bt_webView);
         mbt_atuo.setOnClickListener(this);
         mbt_manual.setOnClickListener(this);
         mbt_file.setOnClickListener(this);
         mbt_photo.setOnClickListener(this);
         mbt_mediaPlayer.setOnClickListener(this);
+        mbt_video.setOnClickListener(this);
+        mbt_webView.setOnClickListener(this);
     }
 
     @Override
@@ -51,6 +56,13 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
                 intent = new Intent(functinSelectActivity.this,mediaPlayerActivity.class);
                 break;
 
+            case R.id.bt_video:
+                intent = new Intent(functinSelectActivity.this,VideoActivity.class);
+                break;
+
+            case R.id.bt_webView:
+                intent = new Intent(functinSelectActivity.this,webActivity.class);
+                break;
         }
         startActivity(intent);
     }

@@ -41,4 +41,20 @@
         android:paddingTop="20dp"
         android:textAllCaps="false"/>
 
+    <Button
+        android:id="@+id/bt_video"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="video"
+        android:paddingTop="20dp"
+        android:textAllCaps="false"/>
+
+    <Button
+        android:id="@+id/bt_webView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="webView"
+        android:paddingTop="20dp"
+        android:textAllCaps="false"/>
+
 </LinearLayout>

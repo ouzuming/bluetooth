@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SENSOR_INFO" />
     <uses-permission android:name="android.permission.SENSOR_ENABLE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- <uses-permission android:name="android.permission.CAMERA" /> -->
     <application
@@ -53,7 +54,9 @@
 
         <activity android:name=".activity.fileActivity" />
         <activity android:name=".activity.photoActivity" />
-        <activity android:name=".activity.mediaPlayerActivity"></activity>
+        <activity android:name=".activity.mediaPlayerActivity" />
+        <activity android:name=".activity.VideoActivity" />
+        <activity android:name=".activity.webActivity"></activity>
     </application>
 
 </manifest>
