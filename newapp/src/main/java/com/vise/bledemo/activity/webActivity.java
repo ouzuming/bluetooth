@@ -39,7 +39,6 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
         setContentView(R.layout.activity_web);
         Log.d(TAG, "widgetInit" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         widgetInit();
-
     }
 
     private void getJsonData() {
@@ -59,38 +58,32 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
                         Log.d(TAG, "response is null" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                         return;
                     }
-                    Log.d(TAG, "response" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     String responseData = response.body().string();
                     Log.d(TAG, "response" + responseData + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                     parseJsonData(responseData);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }).start();
     }
 
     private void parseJsonData(String jsonData) {
         try {
-
             Log.d(TAG, "jsonArray: " + jsonData+ " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
             JSONArray jsonArray = new JSONArray(jsonData);
             Log.d(TAG, "jsonArray length: " + jsonArray.length()+ " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
             StringBuilder builder = new StringBuilder();
-           // for(int i = 0; i < jsonArray.length(); i++){
-                for(int i = 0; i < 3; i++){
+            for(int i = 0; i < jsonArray.length()-1; i++){
                 JSONObject jsonObject =  jsonArray.getJSONObject(i);
                 builder.append("id: ").append(jsonObject.getString("id")).append("\n")
                         .append("version: ").append(jsonObject.getString("version")).append("\n")
                         .append("name: ").append(jsonObject.getString("name")).append("\n");
 
-                Log.d(TAG, "get id = "+ jsonObject.getString("id") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                Log.d(TAG, "get version = "+ jsonObject.getString("version") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                Log.d(TAG, "get name = "+ jsonObject.getString("name") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-            }
-            Log.d(TAG, "builder data" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-            Log.d(TAG, "builder data"+ builder.toString() + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+//                Log.d(TAG, "get id = "+ jsonObject.getString("id") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+//                Log.d(TAG, "get version = "+ jsonObject.getString("version") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+//                Log.d(TAG, "get name = "+ jsonObject.getString("name") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                }
             tv_setJsonData(builder.toString());
         } catch (JSONException e) {
             Log.d(TAG, "builder data error"+ e + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
