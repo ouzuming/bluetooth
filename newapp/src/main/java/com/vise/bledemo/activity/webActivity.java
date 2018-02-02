@@ -23,7 +23,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class webActivity extends AppCompatActivity implements View.OnClickListener{
+public class webActivity extends AppCompatActivity implements View.OnClickListener ,httpCallbackLister{
     WebView mWebView;
     TextView mTv_okHttp, mTv_json;
     Button btn_webView, btn_OKHttp;
@@ -188,4 +188,15 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
                 break;
         }
     }
+
+    @Override
+    public void http_finish() {
+
+    }
+
+    @Override
+    public void http_create() {
+
+    }
 }
+
