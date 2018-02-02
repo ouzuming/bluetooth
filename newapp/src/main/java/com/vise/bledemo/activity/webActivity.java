@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.vise.bledemo.R;
+import com.vise.bledemo.myClass.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,7 +24,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class webActivity extends AppCompatActivity implements View.OnClickListener ,httpCallbackLister{
+public class webActivity extends AppCompatActivity implements View.OnClickListener {
+    OkHttpUtil okHttpUtil;
     WebView mWebView;
     TextView mTv_okHttp, mTv_json;
     Button btn_webView, btn_OKHttp;
@@ -39,6 +41,17 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
         setContentView(R.layout.activity_web);
         Log.d(TAG, "widgetInit" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
         widgetInit();
+        okHttpUtil = new OkHttpUtil(new HttpCallbackLister() {
+            @Override
+            public void success(String responseData) {
+                Log.d(TAG, "call back success" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                parseJsonData(responseData);
+            }
+            @Override
+            public void failure() {
+                Log.d(TAG, "call back failure" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+            }
+        });
     }
 
     private void getJsonData() {
@@ -79,10 +92,6 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
                 builder.append("id: ").append(jsonObject.getString("id")).append("\n")
                         .append("version: ").append(jsonObject.getString("version")).append("\n")
                         .append("name: ").append(jsonObject.getString("name")).append("\n");
-
-//                Log.d(TAG, "get id = "+ jsonObject.getString("id") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-//                Log.d(TAG, "get version = "+ jsonObject.getString("version") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-//                Log.d(TAG, "get name = "+ jsonObject.getString("name") + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 }
             tv_setJsonData(builder.toString());
         } catch (JSONException e) {
@@ -159,6 +168,7 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
             }
         }).start();
     }
+
     private void showResponseInfo(final String responseData) {
         runOnUiThread(new Runnable() {
             @Override
@@ -181,22 +191,16 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.bt_openOKHttp:
-                getJsonData();
+                Log.d(TAG, "bt_openOKHttp onClick  " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                //getJsonData();
+                String uri = json_uri;
+                okHttpUtil.sendHttpRequest(uri);
                 break;
             case R.id.bt_openWebView:
+                Log.d(TAG, "bt_openWebView onClick " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 webViewFunction();
                 break;
         }
-    }
-
-    @Override
-    public void http_finish() {
-
-    }
-
-    @Override
-    public void http_create() {
-
     }
 }
 
