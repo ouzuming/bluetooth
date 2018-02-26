@@ -57,4 +57,20 @@
         android:paddingTop="20dp"
         android:textAllCaps="false"/>
 
+    <Button
+        android:id="@+id/bt_serviceTest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="serviceTest"
+        android:paddingTop="20dp"
+        android:textAllCaps="false"/>
+
+    <Button
+        android:id="@+id/bt_SQL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SQL Test"
+        android:paddingTop="20dp"
+        android:textAllCaps="false"/>
+
 </LinearLayout>

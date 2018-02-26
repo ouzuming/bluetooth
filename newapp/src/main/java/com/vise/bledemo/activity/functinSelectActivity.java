@@ -9,7 +9,7 @@ import android.widget.Button;
 import com.vise.bledemo.R;
 public class functinSelectActivity extends AppCompatActivity implements View.OnClickListener {
     Button mbt_atuo, mbt_manual, mbt_file, mbt_photo, mbt_mediaPlayer,mbt_video;
-    Button mbt_webView;
+    Button mbt_webView, mbt_service,mbt_SQL;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,6 +25,8 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
         mbt_mediaPlayer = findViewById(R.id.bt_mediaPlayer);
         mbt_video = findViewById(R.id.bt_video);
         mbt_webView = findViewById(R.id.bt_webView);
+        mbt_service = findViewById(R.id.bt_serviceTest);
+        mbt_SQL = findViewById(R.id.bt_SQL);
         mbt_atuo.setOnClickListener(this);
         mbt_manual.setOnClickListener(this);
         mbt_file.setOnClickListener(this);
@@ -32,6 +34,8 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
         mbt_mediaPlayer.setOnClickListener(this);
         mbt_video.setOnClickListener(this);
         mbt_webView.setOnClickListener(this);
+        mbt_service.setOnClickListener(this);
+        mbt_SQL.setOnClickListener(this);
     }
 
     @Override
@@ -63,6 +67,15 @@ public class functinSelectActivity extends AppCompatActivity implements View.OnC
             case R.id.bt_webView:
                 intent = new Intent(functinSelectActivity.this,webActivity.class);
                 break;
+
+            case R.id.bt_serviceTest:
+                intent = new Intent(functinSelectActivity.this,ServiceActivity.class);
+                break;
+
+            case R.id.bt_SQL:
+                intent = new Intent(functinSelectActivity.this,SQLActivity.class);
+                break;
+
         }
         startActivity(intent);
     }

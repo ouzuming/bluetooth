@@ -6,6 +6,8 @@ import com.vise.bledemo.activity.HttpCallbackLister;
 
 import java.io.IOException;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -30,21 +32,25 @@ public class OkHttpUtil {
                 Request request = new Request.Builder()
                         .url(uri_address)
                         .build();
-                Response response = null;
-                try {
                     Log.d(TAG, "newCall" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                    response = client.newCall(request).execute();
-                    if (response == null) {
-                        Log.d(TAG, "response is null" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                        httpCallbackLister.failure();
-                        return;
-                    }
-                    String responseData = response.body().string();
-                    Log.d(TAG, "response" + responseData + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                    httpCallbackLister.success(responseData);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    Call call = client.newCall(request);
+                    call.enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            Log.d(TAG, "call onFailure-1" + e + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                            httpCallbackLister.failure(e);
+                            Log.d(TAG, "onFailure" + e + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                            return;
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            Log.d(TAG, "call onResponse" + response + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+                            Response get_response = response;
+                            String responseData = get_response.body().string();
+                            httpCallbackLister.success(responseData);
+                        }
+                    });
             }
         }).start();
     }

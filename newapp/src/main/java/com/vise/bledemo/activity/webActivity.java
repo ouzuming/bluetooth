@@ -47,39 +47,14 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
                 Log.d(TAG, "call back success" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
                 parseJsonData(responseData);
             }
+
             @Override
-            public void failure() {
-                Log.d(TAG, "call back failure" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
+            public void failure(IOException e) {
+                Log.d(TAG, "call back failure" + e + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
             }
         });
     }
 
-    private void getJsonData() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "client" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                OkHttpClient client = new OkHttpClient();
-                Request request = new Request.Builder()
-                                    .url(json_uri)
-                                    .build();
-                Response response = null;
-                try {
-                    Log.d(TAG, "newCall" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                    response = client.newCall(request).execute();
-                    if(response == null){
-                        Log.d(TAG, "response is null" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                        return;
-                    }
-                    String responseData = response.body().string();
-                    Log.d(TAG, "response" + responseData + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                    parseJsonData(responseData);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
 
     private void parseJsonData(String jsonData) {
         try {
@@ -109,7 +84,6 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
                 mTv_json.setText(jsonData);
             }
         });
-
     }
 
     private void widgetInit(){
@@ -119,54 +93,6 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
         btn_webView = findViewById(R.id.bt_openWebView);
         btn_webView.setOnClickListener(this);
         btn_OKHttp.setOnClickListener(this);
-    }
-
-    private void okHttpGetData() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                OkHttpClient client = new OkHttpClient();
-                Request request = new Request.Builder()
-                        .url(default_uri)
-                        .build();
-                Log.d(TAG, "Request" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                try {
-                    Response response = client.newCall(request).execute();
-                    Log.d(TAG, "responseData" + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                    String responseData = response.body().string();
-                     showResponseInfo(responseData);
-                } catch (IOException e) {
-                    Log.d(TAG, "response"+e + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                    e.printStackTrace();
-                }finally {
-
-                }
-            }
-        }).start();
-    }
-
-    private void okHttpPostData(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                OkHttpClient okHttpClient = new OkHttpClient();
-                RequestBody requestBody = new FormBody.Builder()
-                                              .add("username","admin")
-                                              .add("password","123456")
-                                              .build();
-                Request request = new Request.Builder()
-                                        .url(default_uri)
-                                        .post(requestBody)
-                                        .build();
-                try {
-                    Response response = okHttpClient.newCall(request).execute();
-                    String responseData = response.body().string();
-                    showResponseInfo(responseData);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
     }
 
     private void showResponseInfo(final String responseData) {
@@ -192,7 +118,6 @@ public class webActivity extends AppCompatActivity implements View.OnClickListen
         switch (v.getId()){
             case R.id.bt_openOKHttp:
                 Log.d(TAG, "bt_openOKHttp onClick  " + " [" + Thread.currentThread().getId() + "]" + " [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
-                //getJsonData();
                 String uri = json_uri;
                 okHttpUtil.sendHttpRequest(uri);
                 break;

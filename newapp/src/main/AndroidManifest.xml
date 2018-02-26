@@ -56,7 +56,15 @@
         <activity android:name=".activity.photoActivity" />
         <activity android:name=".activity.mediaPlayerActivity" />
         <activity android:name=".activity.VideoActivity" />
-        <activity android:name=".activity.webActivity"></activity>
+        <activity android:name=".activity.webActivity" />
+        <activity android:name=".activity.ServiceActivity" />
+
+        <service
+            android:name=".service.MyDemoService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity android:name=".activity.SQLActivity"></activity>
     </application>
 
 </manifest>
